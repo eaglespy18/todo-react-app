@@ -8,9 +8,10 @@ import {
   onSnapshot,
   deleteDoc,
   doc,
-  updateDoc
+  updateDoc,
 } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Todo() {
   const [task, setTask] = useState('');
@@ -19,7 +20,6 @@ export default function Todo() {
 
   const user = auth.currentUser;
 
-  // 🔄 Real-time fetch of user's todos
   useEffect(() => {
     if (!user) return;
 
@@ -35,7 +35,6 @@ export default function Todo() {
     return () => unsubscribe();
   }, [user]);
 
-  // ➕ Add todo
   const handleAdd = async () => {
     if (task.trim() === '') return;
     await addDoc(collection(db, 'todos'), {
@@ -48,7 +47,6 @@ export default function Todo() {
     setDueDate('');
   };
 
-  // ✅ Toggle completed
   const toggleTodo = async (todo) => {
     const todoRef = doc(db, 'todos', todo.id);
     await updateDoc(todoRef, {
@@ -56,7 +54,6 @@ export default function Todo() {
     });
   };
 
-  // ❌ Delete todo
   const handleDelete = async (id) => {
     await deleteDoc(doc(db, 'todos', id));
   };
@@ -83,27 +80,36 @@ export default function Todo() {
       </div>
 
       <ul className="todo-list">
-        {todos.map((todo) => (
-          <li key={todo.id} className="todo-item">
-            <input
-              type="checkbox"
-              checked={todo.completed}
-              onChange={() => toggleTodo(todo)}
-            />
-            <span
-              className="todo-text"
-              style={{
-                textDecoration: todo.completed ? 'line-through' : 'none',
-                color: todo.completed ? '#aaa' : '#000',
-              }}
+        <AnimatePresence>
+          {todos.map((todo) => (
+            <motion.li
+              key={todo.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.3 }}
+              className="todo-item"
             >
-              {todo.text} - Due: {todo.dueDate}
-            </span>
-            <button onClick={() => handleDelete(todo.id)} className="delete-button">
-              ❌
-            </button>
-          </li>
-        ))}
+              <input
+                type="checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo)}
+              />
+              <span
+                className="todo-text"
+                style={{
+                  textDecoration: todo.completed ? 'line-through' : 'none',
+                  color: todo.completed ? '#aaa' : '#000',
+                }}
+              >
+                {todo.text} - Due: {todo.dueDate}
+              </span>
+              <button onClick={() => handleDelete(todo.id)} className="delete-button">
+                ❌
+              </button>
+            </motion.li>
+          ))}
+        </AnimatePresence>
       </ul>
     </div>
   );
