@@ -3,11 +3,15 @@ import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebase';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from './AuthContext';
+
 
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuth();
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
